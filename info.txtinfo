@@ -1,0 +1,144 @@
+// Search
+  useEffect(() => {
+
+    // Return All user when there is no search text
+    if (searchText.length === 0) {
+      setFilteredUsers(users);
+      setSearchNotFound(false);
+
+    } else {
+
+      // Will Return Search result based on search query
+      const results = searchResults(searchText);
+      if (results.length > 0) {
+        setSearchNotFound(false);
+        setFilteredUsers(results);
+      } else {
+        setSearchNotFound(true);
+      }
+    }
+  }, [searchText]);
+
+  // storing search text
+  const handleSearch = (event) => {
+    setSearchText(event.target.value);
+  };
+
+  // Name filter
+  const searchByName = (name) => {
+    return users.filter((user) => user.name.toLowerCase() === name.toLowerCase());
+  };
+
+  // Email Filter
+  const searchByEmail = (email) => {
+    return users.filter((user) => user.email === email);
+  };
+
+  // Role Filter
+  const searchByRole = (role) => {
+    return users.filter((user) => user.role === role);
+  };
+
+  // Search Functionality 
+  const searchResults = (searchText) => {
+    const searchResultsByName = searchByName(searchText);
+    const searchResultsByEmail = searchByEmail(searchText);
+    const searchResultsByRole = searchByRole(searchText);
+
+    if (searchResultsByName.length) {
+      return searchResultsByName;
+    } else if (searchResultsByEmail.length) {
+      return searchResultsByEmail;
+    } else {
+      return searchResultsByRole;
+    }
+  };
+
+
+<TextField
+          fullWidth
+          label="Search"
+          placeholder="Search by name, email or role"
+          name="search"
+          value={searchText}
+          onChange={handleSearch}
+        />
+
+
+// Pagination
+  useEffect(() => {
+    setCount(Math.ceil(filteredUsers.length / userPerPage));
+    setCurrentPage(startPage);
+    setUserToBeDisplayed(prepareUserToBeDisplayed(filteredUsers, startPage));
+  }, [filteredUsers]);
+
+  
+  // will return new user based on the page 
+  const prepareUserToBeDisplayed = (userList, pageNumber) => {
+    setSelectAllUser(false);
+    setSelected([]);
+    const endIndex = pageNumber * userPerPage;
+    const startIndex = endIndex - userPerPage;
+    return userList.slice(startIndex, endIndex);
+  };
+
+  // will show diff pages based on page number
+  const handlePage = (event, value, userList) => {
+    setCurrentPage(value);
+    setSelectAllUser(false);
+    setUserToBeDisplayed(prepareUserToBeDisplayed(userList, value));
+  };
+
+<Pagination
+                count={count}
+                showFirstButton
+                showLastButton
+                onChange={(event, value) =>
+                  handlePage(event, value, filteredUsers)
+                }
+                page={currentPage}
+              />
+
+setCurrentPage,startPage,setUserToBeDisplayed,setSelectAllUser,setSelected,currentPage
+
+
+<Button
+                variant="contained"
+                color="error"
+                onClick={() => handleSelectedDelete(selected)}
+              >
+                Delete Selected
+              </Button>
+
+
+// Select table row
+  const handleClick = (event, name) => {
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  // Checking is row is selected or not
+  const isSelected = (name) => selected.indexOf(name) !== -1;
+
+
+// delete user by delete button
+  const handleSelectedDelete = (selected) => {
+    const newData = users.filter((user) => !selected.includes(user.name));
+    setUsers(newData);
+    setFilteredUsers(newData);
+  };
